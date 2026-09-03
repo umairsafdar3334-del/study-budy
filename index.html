@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#2C3E50">
+  <title>Study Tracker Pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div id="toast" class="toast"></div>
+
+<div id="authScreen" class="auth-screen">
+  <div class="auth-card">
+    <div class="brand big">📚 Study Tracker Pro</div>
+    <p class="muted">Your personal study command center.</p>
+    <div id="authMessage" class="auth-message"></div>
+    <input id="authEmail" type="email" placeholder="Email address">
+    <input id="authPassword" type="password" placeholder="Password">
+    <button id="loginBtn" class="btn primary full">Sign in</button>
+    <button id="signupBtn" class="btn secondary full">Create account</button>
+    <button id="demoBtn" class="btn ghost full">Use demo mode</button>
+    <p class="small muted">Firebase login is optional during setup. Demo mode stores data in this browser.</p>
+  </div>
+</div>
+
+<div id="app" class="app hidden">
+  <aside class="sidebar">
+    <div class="brand">📚 <span>Study Tracker</span></div>
+    <nav>
+      <button class="nav-btn active" data-page="dashboard">📊 <span>Dashboard</span></button>
+      <button class="nav-btn" data-page="tasks">📋 <span>Tasks</span></button>
+      <button class="nav-btn" data-page="progress">📈 <span>Progress</span></button>
+      <button class="nav-btn" data-page="timetable">⏰ <span>Timetable</span></button>
+      <button class="nav-btn" data-page="exams">📝 <span>Exams</span></button>
+      <button class="nav-btn" data-page="analytics">📊 <span>Analytics</span></button>
+      <button class="nav-btn" data-page="settings">⚙️ <span>Settings</span></button>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="user-mini"><div id="avatar">S</div><div><b id="sideUser">Student</b><span id="syncStatus">Demo mode</span></div></div>
+      <button id="logoutBtn" class="btn ghost full">Log out</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <button id="mobileMenu" class="icon-btn">☰</button>
+      <div><h2 id="pageTitle">Dashboard</h2><p id="todayText" class="muted"></p></div>
+      <div class="top-actions">
+        <button id="themeBtn" class="icon-btn" title="Toggle dark mode">🌙</button>
+        <button class="icon-btn" data-page="settings">⚙️</button>
+      </div>
+    </header>
+
+    <section id="dashboard" class="page active">
+      <div class="welcome">
+        <div><h1 id="welcomeText">Good morning 👋</h1><p>Let's make today productive.</p></div>
+        <button class="btn primary" data-page="tasks">+ Add Task</button>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><span>Tasks Today</span><strong id="statTasks">0/0</strong><small id="statTaskPct">0% complete</small></div>
+        <div class="stat-card"><span>Study Streak</span><strong id="statStreak">0 🔥</strong><small>consecutive days</small></div>
+        <div class="stat-card"><span>Study Hours</span><strong id="statHours">0h</strong><small id="statTarget">Target: 4h</small></div>
+        <div class="stat-card"><span>Overall Progress</span><strong id="statProgress">0%</strong><small>chapter preparation</small></div>
+      </div>
+      <div class="grid-2">
+        <div class="card"><div class="card-head"><h3>📈 Weekly Progress</h3><span class="badge">Last 7 days</span></div><div class="chart-wrap"><canvas id="weeklyChart"></canvas></div></div>
+        <div class="card"><div class="card-head"><h3>⚠️ Weak Areas</h3><button class="link-btn" data-page="progress">View all</button></div><div id="weakList" class="list"></div></div>
+      </div>
+      <div class="grid-2">
+        <div class="card"><div class="card-head"><h3>⏰ Today's Timetable</h3><button class="link-btn" data-page="timetable">Manage</button></div><div id="todaySchedule" class="schedule-list"></div></div>
+        <div class="card"><div class="card-head"><h3>🎯 Today's Focus</h3></div><div id="focusList" class="focus-list"></div></div>
+      </div>
+    </section>
+
+    <section id="tasks" class="page">
+      <div class="section-head"><div><h1>Daily Tasks</h1><p class="muted">Plan, prioritize and complete your work.</p></div><button id="addTaskBtn" class="btn primary">+ Add Task</button></div>
+      <div class="toolbar"><input id="taskSearch" placeholder="🔎 Search tasks..."><select id="taskSubjectFilter"><option value="">All subjects</option></select><select id="taskStatusFilter"><option value="">All status</option><option value="pending">Pending</option><option value="in-progress">In Progress</option><option value="completed">Completed</option></select><select id="taskPriorityFilter"><option value="">All priorities</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select></div>
+      <div id="taskList" class="task-list"></div>
+    </section>
+
+    <section id="progress" class="page">
+      <div class="section-head"><div><h1>Chapter Progress</h1><p class="muted">Update preparation and identify weak areas.</p></div><button id="addChapterBtn" class="btn primary">+ Add Chapter</button></div>
+      <div class="stats-grid mini"><div class="stat-card"><span>Average</span><strong id="progressAvg">0%</strong></div><div class="stat-card"><span>Strong</span><strong id="strongCount">0</strong></div><div class="stat-card"><span>Average</span><strong id="avgCount">0</strong></div><div class="stat-card"><span>Weak</span><strong id="weakCount">0</strong></div></div>
+      <div id="chapterGrid" class="chapter-grid"></div>
+    </section>
+
+    <section id="timetable" class="page">
+      <div class="section-head"><div><h1>Smart Timetable</h1><p class="muted">Build your weekly schedule.</p></div><button id="addSlotBtn" class="btn primary">+ Add Slot</button></div>
+      <div class="card timetable-card"><div class="table-scroll"><table><thead><tr><th>Time</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th><th>Thursday</th><th>Friday</th><th>Saturday</th><th>Sunday</th></tr></thead><tbody id="timetableBody"></tbody></table></div></div>
+      <div class="stats-grid"><div class="stat-card"><span>Weekly Target</span><strong id="weeklyTarget">0h</strong></div><div class="stat-card"><span>Scheduled</span><strong id="scheduledHours">0h</strong></div><div class="stat-card"><span>Coverage</span><strong id="scheduleCoverage">0%</strong></div><div class="stat-card"><span>Best Subject</span><strong id="bestScheduled">—</strong></div></div>
+    </section>
+
+    <section id="exams" class="page">
+      <div class="section-head"><div><h1>Exam Preparation</h1><p class="muted">Never lose track of an important test.</p></div><button id="addExamBtn" class="btn primary">+ Add Exam</button></div>
+      <div id="examGrid" class="exam-grid"></div>
+    </section>
+
+    <section id="analytics" class="page">
+      <div class="section-head"><div><h1>Reports & Analytics</h1><p class="muted">Understand your study performance.</p></div><button id="exportBtn" class="btn secondary">⬇ Export Data</button></div>
+      <div class="grid-2"><div class="card"><div class="card-head"><h3>Subject Progress</h3></div><div class="chart-wrap"><canvas id="subjectChart"></canvas></div></div><div class="card"><div class="card-head"><h3>Task Performance</h3></div><div class="chart-wrap"><canvas id="taskChart"></canvas></div></div></div>
+      <div class="card"><div class="card-head"><h3>📋 Weekly Report</h3></div><div id="weeklyReport" class="report"></div></div>
+    </section>
+
+    <section id="settings" class="page">
+      <div class="section-head"><div><h1>Settings</h1><p class="muted">Personalize your study tracker.</p></div></div>
+      <div class="card settings-card"><h3>Profile</h3><div class="form-grid"><label>Name<input id="profileName"></label><label>Weekly study target (hours)<input id="profileTarget" type="number" min="1" max="100"></label><label>Monthly goal<input id="profileGoal"></label></div><button id="saveProfile" class="btn primary">Save Profile</button></div>
+      <div class="card settings-card"><h3>Subjects</h3><div class="form-inline"><input id="newSubject" placeholder="e.g. Biology"><button id="addSubject" class="btn secondary">Add Subject</button></div><div id="subjectChips" class="chips"></div></div>
+      <div class="card settings-card danger-card"><h3>Data</h3><p class="muted">Export a backup before deleting your local data.</p><button id="resetBtn" class="btn danger">Reset Demo Data</button></div>
+    </section>
+  </main>
+</div>
+
+<div id="modal" class="modal hidden"><div class="modal-box"><div class="modal-head"><h3 id="modalTitle">Add</h3><button id="closeModal" class="icon-btn">✕</button></div><form id="modalForm"></form></div></div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
